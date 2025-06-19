@@ -1,4 +1,4 @@
-let camera = { position: [50, 500, 1500], pitch: 0, yaw: 0, moveSpeed: 4, rotateSpeed: 0.001 };
+let camera = { position: [50, 500, 1500], pitch: 0, yaw: 0, moveSpeed: 10, rotateSpeed: 0.001 };
 let keys = {};
 
 export function handleKeyDown(event) {
@@ -22,10 +22,33 @@ export function handleMouseMove(event) {
 }
 
 export function updateCamera() {
+    // Rotation speed
+    const rotateTimes = 10;
+
+    // Handle rotation input
+    if (keys['i']) {
+        camera.pitch += camera.rotateSpeed * rotateTimes;
+    }
+    if (keys['k']) {
+        camera.pitch -= camera.rotateSpeed * rotateTimes;
+    }
+    if (keys['l']) {
+        camera.yaw += camera.rotateSpeed * rotateTimes;
+    }
+    if (keys['j']) {
+        camera.yaw -= camera.rotateSpeed * rotateTimes;
+    }
+
+    // Clamp pitch to avoid flipping (optional, if needed)
+    const maxPitch = Math.PI / 2 - 0.01;
+    const minPitch = -Math.PI / 2 + 0.01;
+    camera.pitch = Math.max(minPitch, Math.min(maxPitch, camera.pitch));
+
     // Calculate direction vector
     const direction = [
         Math.cos(camera.pitch) * Math.sin(camera.yaw),
-        Math.sin(camera.pitch), -Math.cos(camera.pitch) * Math.cos(camera.yaw)
+        Math.sin(camera.pitch),
+        -Math.cos(camera.pitch) * Math.cos(camera.yaw)
     ];
 
     // Right vector
@@ -52,8 +75,7 @@ export function updateCamera() {
     let flatDirection = vec3.create();
     vec3.normalize(flatDirection, up_cross_flatright);
 
-    // Adjust speed based on key presses (you can map these to your
-    // specific keys)
+    // Adjust speed based on key presses
     let speed = camera.moveSpeed;
     if (keys['shift']) {
         speed *= 5;
@@ -70,6 +92,7 @@ export function updateCamera() {
         camera.position[1] -= flatDirection[1] * speed;
         camera.position[2] -= flatDirection[2] * speed;
     }
+
     // Strafe left/right
     if (keys['d']) {
         camera.position[0] += flatRight[0] * speed;
