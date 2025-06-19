@@ -1,4 +1,4 @@
-import { setVoxelSize, init_render_context, start_render_loop, update_render_frame } from "./core/render.js";
+import { init_render_context, start_render_loop, update_render_frame } from "./core/render.js";
 import { dlSpdFetch, alloc2DInt64Array } from './core/utils.js';
 import { fetchAndParseMpd, extractBandwidthFromMpd } from './dash/mpd.js';
 import { WasmDecoder } from "./core/wasm_wrapper.js";
@@ -36,8 +36,6 @@ async function fetch_video_segment_loop(module, bandwidthMatrix) {
     }
 }
 
-const arr = [1, 2, 3, 5, 9];
-
 function makeSegmentUrl(module, index, bitrates, currBw) {
     const paddedIndex = String(index).padStart(5, '0');
 
@@ -46,7 +44,6 @@ function makeSegmentUrl(module, index, bitrates, currBw) {
         module.wasmPcsEqualLodSelect(bitrates.seqCount, bitrates.repCount, bitrates.ptr, currBw, seqVersPtr);
         const jsVersions = Array.from(new Uint8Array(module._module.HEAPU8.buffer, seqVersPtr, bitrates.seqCount));
 
-        setVoxelSize(arr[jsVersions[0]] * 2);
         module.wasmFree(seqVersPtr);
 
         return `./0.seg${paddedIndex}.r${jsVersions[0]}.bin?nocache=${Date.now()}`;
